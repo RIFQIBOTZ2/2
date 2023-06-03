@@ -44,6 +44,7 @@
         "@adiwajshing/keyed-db": "^0.2.4",
         "@bochilteam/scraper": "^2.0.0",
         "acrcloud": "^1.4.0",
+         "api-dylux": "^1.2.8",
         "anonfile-lib": "^1.0.1",
         "async": "^3.2.3",
         "awesome-phonenumber": "^2.73.0",
