@@ -91,7 +91,7 @@ const logger = pino({
 }).child({ class: 'baileys'})
 
 const connectionOptions = {
-  version: [2, 2208, 14],
+  version: [2,2323,4],
   printQRInTerminal: true,
   browser: ['RIFQI BOTZ','Safari','1.0.0'],
   auth: state,
