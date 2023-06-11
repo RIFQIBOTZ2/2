@@ -1,5 +1,5 @@
 {
-    "name": "BABU RIFQI",
+    "name": "Rifqi Botz",
     "version": "07.06.98",
     "description": "BASE ORIGINAL AINE",
     "depecrated": false,
@@ -40,7 +40,7 @@
     },
     "license": "GPL-3.0-or-later",
     "dependencies": {
-        "@adiwajshing/baileys": "npm:baileys-md@5.0.5",
+        "@adiwajshing/baileys": "npm:@whiskeysockets/baileys@6.2.1",
         "@adiwajshing/keyed-db": "^0.2.4",
         "@bochilteam/scraper": "^2.0.0",
         "acrcloud": "^1.4.0",
