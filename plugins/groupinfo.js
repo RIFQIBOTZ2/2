@@ -13,7 +13,7 @@ let handler = async (m, { conn, participants, groupMetadata }) => {
         pp = await conn.profilePictureUrl(m.chat, 'image')
     } catch (e) {
     } finally {
-        let { expired, viewonce, antiSticker, antiBadword, isBanned, welcome, detect, sWelcome, sBye, sPromote, sDemote, antiLink } = global.db.data.chats[m.chat]
+        let { expired, viewonce, antiSticker, antiBadword, isBanned, welcome, detect, sWelcome, sBye, sPromote, sDemote, antiLink, antiLink2, antiWame, antiWame2 } = global.db.data.chats[m.chat]
         const groupAdmins = participants.filter(p => p.admin)
         const listAdmin = groupAdmins.map((v, i) => `${i + 1}. @${v.id.split('@')[0]}`).join('\n')
        // const owner = groupMetadata.owner || groupAdmins.find(p => p.admin === 'superadmin')?.id || m.chat.split`-`[0] + '@s.whatsapp.net'
@@ -46,6 +46,9 @@ ${welcome ? '✅' : '❌'} Welcome
 ${detect ? '✅' : '❌'} Detect
 ${global.db.data.chats[m.chat].delete ? '❌' : '✅'} Anti Delete
 ${antiLink ? '✅' : '❌'} Anti Link
+${antiLink2 ? '✅' : '❌'} Anti Link2
+${antiWame ? '✅' : '❌'} AntiWame
+${antiWame2 ? '✅' : '❌'} AntiWame2
 
 *Message Settings:*
 Welcome: ${sWelcome}
