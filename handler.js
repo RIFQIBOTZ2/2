@@ -553,6 +553,9 @@ module.exports = {
                     if (!('sDemote' in chat)) chat.sDemote = ''
                     if (!('delete' in chat)) chat.delete = true
                     if (!('antiLink' in chat)) chat.antiLink = false 
+                    if (!('antiLink2' in chat)) chat.antiLink2 = false 
+                    if (!('antiWame' in chat)) chat.antiWame = false 
+                    if (!('antiWame2' in chat)) chat.antiWame2 = false     
                     if (!('antiSticker' in chat)) chat.antiSticker = false
                     if (!('stiker' in chat)) chat.stiker = false
                     if (!('simi' in chat)) chat.simi = false
@@ -572,6 +575,9 @@ module.exports = {
                     sDemote: '',
                     delete: true,
                     antiLink: false,
+                    antiLink2: false,
+                    antiWame: false,
+                    antiWame2: false,
                     stiker: false,
                     simi: false,
                     mute: true,
@@ -909,12 +915,7 @@ module.exports = {
                         } finally {
                   text = (action === 'add' ? (chat.sWelcome || this.welcome || conn.welcome || 'Welcome, @user!').replace('@subject', await this.getName(id)).replace('@desc', groupMetadata.desc ? String.fromCharCode(8206).repeat(4001) + groupMetadata.desc : '') :
                                 (chat.sBye || this.bye || conn.bye || 'Bye, @user!')).replace('@user', '@' + user.split('@')[0])
-                                this.sendFile(id, pp, 'pp.jpg', text, null, false, { mentions: [user] })
-                        }
-                    }
-                }
-                             /**   this.sendButtonImg(id, pp, text, "Group Message", `By RifqiBotz\n
-*BOT ON 24 JAM & ADA FITUR STORE*
+                            /**    this.sendButtonImg(id, pp, text, "Group Message", `WhatsApp Bot\n*BOT ON 24 JAM & ADA FITUR STORE*
 ╭──「 *_SEWA BOT_* 」
 │❏  1 MINGGU : IDR 2.000 (2K)
 │❏  1 BULAN : IDR 3.000 (3K)
@@ -946,6 +947,7 @@ module.exports = {
 *_/HEROKU/WIBUSOFT_*
 *_DI JAMIN ANTI DELAY & ON 24 JAM!_*
 *_📍 BERGARANSI FULL_*
+
 
 
 ╭──「 *_JADI BOT + OWNER_* 」
@@ -982,10 +984,11 @@ module.exports = {
 *_📍BOT INI MEMAKAI PANEL BUKAN TERMUX_*
 *_/HEROKU/WIBUSOFT_*
 *_DI JAMIN ANTI DELAY & ON 24 JAM!_*
-*_📍 BERGARANSI FULL_*`, "wkwk", null)
+*_📍 BERGARANSI FULL_*`, "wkwk", null)**/
+this.sendFile(id, pp, 'pp.jpg', text, null, false, { mentions: [user] })
                                 }
                     }
-                }**/
+                }
                 break
         case 'promote':
             text = (chat.sPromote || this.spromote || conn.spromote || '@user ```is now Admin```')
