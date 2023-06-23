@@ -86,6 +86,24 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner, isAdmin, isR
       }
       chat.antiLink2 = isEnable
       break 
+          case 'antiwame':
+      if (m.isGroup) {
+        if (!(isAdmin || isOwner)) {
+          global.dfail('admin', m, conn)
+          throw false
+        }
+      }
+      chat.antiWame = isEnable
+      break 
+           case 'antiwame2':
+      if (m.isGroup) {
+        if (!(isAdmin || isOwner)) {
+          global.dfail('admin', m, conn)
+          throw false
+        }
+      }
+      chat.antiWame2 = isEnable
+      break 
     case 'antisticker':
       if (m.isGroup) {
         if (!(isAdmin || isOwner)) {
@@ -215,6 +233,8 @@ List option:
 | public
 | antilink
 | antilink2
+| antiwame
+| antiwame2
 | antidelete
 | antitoxic
 | antisticker
