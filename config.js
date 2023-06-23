@@ -4,6 +4,7 @@ let chalk = require('chalk')
 global.namaowner = `unoshop`
 global.namabot = `unoshop`
 global.thumb = 'https://telegra.ph/file/b45f15e5fb8e37692c544.jpg'
+global.nomorown = '6285234852749'
 
 owner = [
   ['6283852843517'],
